@@ -1,5 +1,5 @@
 streamlit
 textblob
 SpeechRecognition
-PyAudio
+st-audiorec
 pandas
