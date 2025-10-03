@@ -2,7 +2,8 @@ import streamlit as st
 import speech_recognition as sr
 from textblob import TextBlob
 import pandas as pd
-from datetime import datetime
+from st_audiorec import st_audiorec
+import io
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -22,61 +23,60 @@ def initialize_state():
         st.session_state.contacts = []
     if 'medical_details' not in st.session_state:
         st.session_state.medical_details = {
-            "Doctor Name": "",
-            "Doctor Contact": "",
-            "Blood Type": "",
-            "Allergies": "",
-            "Conditions": ""
+            "Doctor Name": "", "Doctor Contact": "", "Blood Type": "",
+            "Allergies": "", "Conditions": ""
         }
 
-# --- Voice Transcription Function ---
-def transcribe_voice():
-    """Listens to the microphone and returns the transcribed text."""
+# --- Audio to Text Conversion Function ---
+def audio_to_text(audio_bytes):
+    """Converts audio bytes to text using SpeechRecognition."""
+    if not audio_bytes:
+        return ""
+    
     r = sr.Recognizer()
-    text = ""
-    with sr.Microphone() as source:
-        st.info("Listening... Please say something.")
+    # Use an in-memory WAV file
+    wav_file = io.BytesIO(audio_bytes)
+    with sr.AudioFile(wav_file) as source:
         try:
-            r.adjust_for_ambient_noise(source, duration=0.5)
-            audio = r.listen(source, timeout=5, phrase_time_limit=15)
-            st.info("Recognizing...")
-            text = r.recognize_google(audio)
-        except sr.WaitTimeoutError:
-            st.warning("Listening timed out. Please try again.")
+            audio_data = r.record(source)
+            text = r.recognize_google(audio_data)
+            return text
         except sr.UnknownValueError:
-            st.error("Sorry, I could not understand what you said.")
+            st.error("Could not understand the audio. Please try speaking clearly.")
         except sr.RequestError as e:
-            st.error(f"Could not connect to Google services; {e}")
-    return text
+            st.error(f"Could not request results from Google service; {e}")
+    return ""
+
 
 # --- Page Rendering Functions ---
 
-# --- Find this function in your app.py file ---
 def render_home():
-    """Renders the Mindful AI Diary page."""
+    """Renders the Mindful AI Diary page with client-side voice input."""
     st.title("Mindful AI Diary 🧠")
-    st.write("A gentle space to share your thoughts. Type your feelings in the box below.")
+    st.write("A gentle space to share your thoughts. Just tap the microphone, speak, and tap again.")
     st.write("---")
 
-    # --- THIS IS THE MODIFIED PART ---
-    # We replace the button and transcribe_voice() with a text_area
-    user_text = st.text_area("How are you feeling today?", height=200, placeholder="You can write about anything...")
+    # --- THIS IS THE NEW VOICE COMPONENT ---
+    # It records audio in the browser and sends it to the Python backend
+    audio_bytes = st_audiorec()
 
-    # The analysis part below remains the same and will run automatically when the user types
-    if user_text:
-        st.write("---")
-        st.write(f"**You wrote:** *'{user_text}'*")
-        
-        blob = TextBlob(user_text)
-        polarity = blob.sentiment.polarity
-        
-        st.subheader("A Thought for You:")
-        if polarity > 0.2:
-            st.success("That sounds wonderful! It's lovely to hear such positivity. Keep embracing that joy.")
-        elif polarity < -0.2:
-            st.warning("It sounds like you're going through a tough moment. Remember to be kind to yourself. A quiet cup of tea can be a comforting friend.")
-        else:
-            st.info("Thank you for sharing. Taking a moment to reflect is a gift to yourself.")
+    if audio_bytes:
+        st.info("Audio recorded. Now analyzing your thoughts...")
+        # Convert audio to text
+        user_text = audio_to_text(audio_bytes)
+
+        if user_text:
+            st.write(f"**You said:** *'{user_text}'*")
+            blob = TextBlob(user_text)
+            polarity = blob.sentiment.polarity
+            st.write("---")
+            st.subheader("A Thought for You:")
+            if polarity > 0.2:
+                st.success("That sounds wonderful! It's lovely to hear such positivity. Keep embracing that joy.")
+            elif polarity < -0.2:
+                st.warning("It sounds like you're going through a tough moment. Remember to be kind to yourself. A quiet cup of tea can be a comforting friend.")
+            else:
+                st.info("Thank you for sharing. Taking a moment to reflect is a gift to yourself.")
 
 def render_reminders():
     """Renders the Medicine Reminders page."""
@@ -155,7 +155,6 @@ def render_medical_details():
 
 # --- Main App Logic ---
 
-# Initialize state on first run
 initialize_state()
 
 # Sidebar for navigation
@@ -165,7 +164,22 @@ with st.sidebar:
         st.session_state.page = 'Home'
     if st.button("Medicine Reminders", use_container_width=True, type="primary" if st.session_state.page == 'Reminders' else "secondary"):
         st.session_state.page = 'Reminders'
-    if st.button("Emergency Contacts", use_container_width=True, type="primary" if st.session_state.page == 'Contacts' else "secondary"):
+    if st.button("Emergency Contacts", use_container_width=I have selected "streamlit
+textblob
+SpeechRecognition
+st-audiorec
+pandas" text between  and  in the most up-to-date Canvas "List of Dependencies" document above and am asking a query about/based on this text below.
+Instructions to follow:
+  * Don't output/edit the document if the query is Direct/Simple. For example, if the query asks for a simple explanation, output a direct answer.
+  * Make sure to **edit** the document if the query shows the intent of editing the document, in which case output the entire edited document, **not just that section or the edits**.
+    * Don't output the same document/empty document and say that you have edited it.
+    * Don't change unrelated text in the document.
+  * Don't output  and  in your final response.
+  * Any references like "this" or "selected text" refers to the text between  and  tags.
+  * Just acknowledge my request in the introduction.
+  * Make sure to refer to the document as "Canvas" in your response.
+
+give code of above changesTrue, type="primary" if st.session_state.page == 'Contacts' else "secondary"):
         st.session_state.page = 'Contacts'
     if st.button("My Medical Details", use_container_width=True, type="primary" if st.session_state.page == 'Medical Details' else "secondary"):
         st.session_state.page = 'Medical Details'
@@ -182,3 +196,4 @@ elif st.session_state.page == 'Contacts':
     render_contacts()
 elif st.session_state.page == 'Medical Details':
     render_medical_details()
+
