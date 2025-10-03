@@ -51,26 +51,32 @@ def transcribe_voice():
 
 # --- Page Rendering Functions ---
 
+# --- Find this function in your app.py file ---
 def render_home():
     """Renders the Mindful AI Diary page."""
     st.title("Mindful AI Diary 🧠")
-    st.write("A gentle space to share your thoughts. Just tap the button and speak from the heart.")
+    st.write("A gentle space to share your thoughts. Type your feelings in the box below.")
     st.write("---")
 
-    if st.button("🎤 Tap here and tell me about your day", key="voice_button"):
-        user_text = transcribe_voice()
-        if user_text:
-            st.write(f"**You said:** *'{user_text}'*")
-            blob = TextBlob(user_text)
-            polarity = blob.sentiment.polarity
-            st.write("---")
-            st.subheader("A Thought for You:")
-            if polarity > 0.2:
-                st.success("That sounds wonderful! It's lovely to hear such positivity. Keep embracing that joy.")
-            elif polarity < -0.2:
-                st.warning("It sounds like you're going through a tough moment. Remember to be kind to yourself. A quiet cup of tea can be a comforting friend.")
-            else:
-                st.info("Thank you for sharing. Taking a moment to reflect is a gift to yourself.")
+    # --- THIS IS THE MODIFIED PART ---
+    # We replace the button and transcribe_voice() with a text_area
+    user_text = st.text_area("How are you feeling today?", height=200, placeholder="You can write about anything...")
+
+    # The analysis part below remains the same and will run automatically when the user types
+    if user_text:
+        st.write("---")
+        st.write(f"**You wrote:** *'{user_text}'*")
+        
+        blob = TextBlob(user_text)
+        polarity = blob.sentiment.polarity
+        
+        st.subheader("A Thought for You:")
+        if polarity > 0.2:
+            st.success("That sounds wonderful! It's lovely to hear such positivity. Keep embracing that joy.")
+        elif polarity < -0.2:
+            st.warning("It sounds like you're going through a tough moment. Remember to be kind to yourself. A quiet cup of tea can be a comforting friend.")
+        else:
+            st.info("Thank you for sharing. Taking a moment to reflect is a gift to yourself.")
 
 def render_reminders():
     """Renders the Medicine Reminders page."""
